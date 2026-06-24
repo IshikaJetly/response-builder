@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Response Builder — CS Intake</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff;
+      --bg2: #f7f7f5;
+      --bg3: #f0efe9;
+      --text: #1a1a18;
+      --text2: #6b6b67;
+      --text3: #9b9b96;
+      --border: rgba(0,0,0,0.1);
+      --border2: rgba(0,0,0,0.18);
+      --radius: 8px;
+      --radius-lg: 12px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --mono: 'SF Mono', 'Fira Code', monospace;
+      --green-bg: #E1F5EE;
+      --green-text: #085041;
+      --green-border: #5DCAA5;
+      --purple-bg: #EEEDFE;
+      --purple-text: #3C3489;
+      --purple-border: #AFA9EC;
+      --amber-bg: #FAEEDA;
+      --amber-text: #633806;
+      --amber-border: #EF9F27;
+      --danger-bg: #FCEBEB;
+      --danger-text: #A32D2D;
+      --danger-border: #F09595;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1e1e1c; --bg2: #2a2a28; --bg3: #323230;
+        --text: #f0efe9; --text2: #a0a09a; --text3: #6b6b67;
+        --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+        --green-bg: #04342C; --green-text: #9FE1CB;
+        --purple-bg: #26215C; --purple-text: #CECBF6;
+        --amber-bg: #412402; --amber-text: #FAC775;
+        --danger-bg: #501313; --danger-text: #F7C1C1;
+      }
+    }
+    body { font-family: var(--font); background: var(--bg3); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 720px; margin: 0 auto; }
+    .app-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 12px; flex-wrap: wrap; }
+    .app-title { font-size: 20px; font-weight: 500; color: var(--text); }
+    .app-title span { font-size: 13px; font-weight: 400; color: var(--text2); margin-left: 8px; }
+    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-sheet { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 7px 14px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: var(--bg); color: var(--text); cursor: pointer; text-decoration: none; font-family: var(--font); }
+    .btn-sheet:hover { background: var(--bg2); }
+    .btn-resync { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 7px 14px; border-radius: var(--radius); border: 0.5px solid var(--green-border); background: var(--green-bg); color: var(--green-text); cursor: pointer; font-family: var(--font); }
+    .btn-resync:hover { opacity: 0.85; }
+    .status-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text2); margin-bottom: 1.25rem; padding: 8px 12px; background: var(--bg2); border-radius: var(--radius); border: 0.5px solid var(--border); }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; }
+    .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+    .section-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); margin: 0 0 10px; }
+    label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 5px; }
+    input, textarea, select { width: 100%; font-family: var(--font); font-size: 14px; color: var(--text); background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 8px 12px; outline: none; }
+    input:focus, textarea:focus { border-color: var(--green-border); box-shadow: 0 0 0 2px rgba(29,158,117,0.15); }
+    textarea { resize: vertical; min-height: 80px; }
+    .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .fpill { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 10px; border: 0.5px solid var(--border2); background: var(--bg2); cursor: pointer; color: var(--text2); font-family: var(--font); }
+    .fpill.active-all { background: var(--bg); border-color: var(--border2); color: var(--text); }
+    .fpill.active-pending { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-text); }
+    .fpill.active-initial { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+    .fpill.active-other { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber-text); }
+    .search-wrap { position: relative; }
+    .dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--radius); max-height: 260px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: none; }
+    .dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; border-bottom: 0.5px solid var(--border); }
+    .dd-item:last-child { border-bottom: none; }
+    .dd-item:hover { background: var(--bg2); }
+    .dd-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+    .dd-code { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+    .tbadge { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px; }
+    .tb-pending { background: var(--purple-bg); color: var(--purple-text); }
+    .tb-initial { background: var(--green-bg); color: var(--green-text); }
+    .tb-other { background: var(--amber-bg); color: var(--amber-text); }
+    .new-tag { display: inline-block; font-size: 9px; font-weight: 500; padding: 1px 6px; border-radius: 6px; background: var(--amber-bg); color: var(--amber-text); margin-left: 4px; vertical-align: middle; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    .ro { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: 14px; color: var(--text); min-height: 38px; line-height: 1.5; }
+    .ro.mono { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+    .actions { display: flex; gap: 8px; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+    .btn-add { display: inline-flex; align-items: center; gap: 5px; background: var(--green-bg); color: var(--green-text); border: 0.5px solid var(--green-border); border-radius: var(--radius); padding: 8px 16px; font-size: 14px; cursor: pointer; font-family: var(--font); }
+    .btn-add:hover { opacity: 0.85; }
+    .btn-copy { display: inline-flex; align-items: center; gap: 6px; background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 8px 14px; font-size: 13px; cursor: pointer; color: var(--text); font-family: var(--font); }
+    .btn-copy:hover { background: var(--bg2); }
+    .btn-clear { display: inline-flex; align-items: center; gap: 5px; background: var(--danger-bg); color: var(--danger-text); border: 0.5px solid var(--danger-border); border-radius: var(--radius); padding: 8px 14px; font-size: 13px; cursor: pointer; font-family: var(--font); }
+    .err { font-size: 13px; color: var(--danger-text); }
+    .divider { border: none; border-top: 0.5px solid var(--border); margin: 1.25rem 0; }
+    .entries-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .count-badge { display: inline-block; background: var(--green-bg); color: var(--green-text); border-radius: 10px; padding: 2px 10px; font-size: 12px; font-weight: 500; }
+    .ecard { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .emeta { flex: 1; min-width: 0; }
+    .ekey { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+    .eq { font-size: 13px; color: var(--text); margin: 2px 0; }
+    .eresp { font-size: 12px; color: var(--text3); }
+    .btn-del { background: none; border: none; cursor: pointer; color: var(--danger-text); padding: 2px; font-size: 16px; line-height: 1; }
+    .output-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
+    .output-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1rem; font-family: var(--mono); font-size: 11.5px; color: var(--text); white-space: pre-wrap; word-break: break-all; min-height: 56px; line-height: 1.6; }
+    .copied { font-size: 12px; color: var(--green-text); }
+    mark { background: var(--amber-bg); color: var(--amber-text); border-radius: 2px; padding: 0 2px; }
+    .no-results { padding: 10px 12px; font-size: 13px; color: var(--text2); }
+    .empty-state { text-align: center; padding: 2rem 1rem; color: var(--text2); font-size: 13px; }
+    .empty-icon { font-size: 32px; margin-bottom: 8px; opacity: 0.35; }
+    .sync-note { font-size: 11px; color: var(--text3); margin-top: 8px; text-align: center; }
+    @media (max-width: 480px) {
+      .two-col { grid-template-columns: 1fr; }
+      .app-title span { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="app-header">
+    <p class="app-title">Response builder <span>JSON generator · CS intake</span></p>
+    <div class="header-btns">
+      <a class="btn-sheet" href="https://docs.google.com/spreadsheets/d/1jnrDJGSIw1Dm5oxsmZXtwJmgzugUYd_ctyTvdFz6sos/edit" target="_blank">
+        <i class="ti ti-table"></i> Open sheet
+        <i class="ti ti-external-link" style="font-size:12px;opacity:0.6;"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <span class="status-dot"></span>
+    <span>243 questions across 2 tabs · Last synced June 24, 2026</span>
+  </div>
+
+  <div class="card">
+    <p class="section-label"><i class="ti ti-search"></i> Step 1 — find a question</p>
+    <div class="filter-row" id="filter-row"></div>
+    <div class="search-wrap">
+      <input type="text" id="qsearch" placeholder="Search across all questions and response codes…" autocomplete="off" />
+      <div class="dropdown" id="dd"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="section-label"><i class="ti ti-forms"></i> Step 2 — confirm &amp; respond</p>
+    <div class="two-col">
+      <div>
+        <label>Response code</label>
+        <div class="ro mono" id="disp-code">—</div>
+      </div>
+      <div>
+        <label>Source tab</label>
+        <div class="ro" id="disp-tab">—</div>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label>Question text</label>
+      <div class="ro" id="disp-q">—</div>
+    </div>
+    <div>
+      <label for="qresp">Claimant response</label>
+      <textarea id="qresp" placeholder="Enter the claimant's answer…"></textarea>
+    </div>
+    <div class="actions">
+      <button class="btn-add" onclick="addEntry()"><i class="ti ti-plus"></i> Add to JSON</button>
+      <span class="err" id="errmsg"></span>
+    </div>
+  </div>
+
+  <div id="entries-wrap" style="display:none;">
+    <div class="entries-header">
+      <p class="section-label" style="margin:0;"><i class="ti ti-list-check"></i> Added entries</p>
+      <span class="count-badge" id="cbadge">0</span>
+    </div>
+    <div id="elist"></div>
+    <hr class="divider" />
+    <div class="output-label">
+      <p class="section-label" style="margin:0;"><i class="ti ti-code"></i> Generated JSON</p>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-copy" onclick="copyJSON()"><i class="ti ti-copy"></i> Copy JSON</button>
+        <button class="btn-clear" onclick="clearAll()"><i class="ti ti-trash"></i> Clear all</button>
+        <span class="copied" id="copymsg" style="display:none;"><i class="ti ti-check"></i> Copied!</span>
+      </div>
+    </div>
+    <div class="output-box" id="jout"></div>
+  </div>
+
+  <div id="empty-entries" class="empty-state">
+    <div class="empty-icon"><i class="ti ti-file-plus"></i></div>
+    Search a question above, enter the claimant's response,<br>and click <strong>Add to JSON</strong>.
+  </div>
+
+  <p class="sync-note">To update questions, ask Claude to re-read the sheet and replace this file.</p>
+
+</div>
+<script>
+const NEW=["response-ssd-hearing-schedule","response-hearing-status"];
+const RAW=[
+  ["Do you currently have an active SSD claim at any stage?","response-2-claim-stage","FD Pending"],
+  ["Pending claim stage (SSD)","response-pending-stage-ssd","FD Pending"],
+  ["Initial Status","response-initial-status","FD Pending"],
+  ["Reconsideration Status","response-recon-status","FD Pending"],
+  ["Is there a SSD hearing scheduled?","response-ssd-hearing-schedule","FD Pending"],
+  ["What is the status of hearing?","response-hearing-status","FD Pending"],
+  ["Could you share the details of your DLI?","response-share-dli","FD Pending"],
+  ["When was the last time you worked full-time for pay?","response-fulltime-pay","FD Pending"],
+  ["Have you looked for any other work?","reponse-ssd-full-time-work-looked-for","FD Pending"],
+  ["Before ending your employment, did your employer provide: extra breaks, assistance from coworkers, special equipment, lower production rate, or other accommodations?","response-fwa-employer-accommodations","FD Pending"],
+  ["Did your employer indicate they could no longer continue providing these accommodations?","response-employer-stop-the-accommodations","FD Pending"],
+  ["Was there a cause for the change in your work activity, besides your health conditions (e.g. layoffs, moving)","response-other-reason-for-work-change","FD Pending"],
+  ["When you first stopped working, did you think this would be a temporary break or permanent?","response-fwa-when-stopped-workin","FD Pending"],
+  ["Did you collect or file for unemployment, after your most recent job ended?","response-fwa-unemployment-filed-collected","FD Pending"],
+  ["Did your doctors advise you to stop working?","response-doctor-advice-to-stop-working","FD Pending"],
+  ["What types of treatment have you attempted (physical therapy, surgery, medications, etc.)?","response-have-any-treatment-helped","FD Pending"],
+  ["Are you currently waiting to start any new treatments?","response-fwa-waiting-for-new-treatments","FD Pending"],
+  ["Were you born in the United States or a United States Territory?","response-born-u-s","FD Pending"],
+  ["Are you a United States citizen?","response-us-citizen","FD Pending"],
+  ["Are you a naturalized citizen?","response-naturalized-citizen","FD Pending"],
+  ["Have you used any other names?","response-provided-other-names","FD Pending"],
+  ["Do you have any children?","response-children","FD Pending"],
+  ["Do you have any dependents that became disabled prior to age 22 (dependent's age)?","response-any-dependents","FD Pending"],
+  ["Does the dependent currently receive SSA benefits?","response-dependent-receive-ssa","FD Pending"],
+  ["Do you have any unmarried dependent(s) under the age of 19 still attending elementary or secondary school?","response-any-dependents2","FD Pending"],
+  ["Have you ever applied, or do you intend to apply for VA benefits?","response-vet-ben","FD Pending"],
+  ["Are you getting any support or benefits from the VA at this time?","response-v-a-benefits","FD Pending"],
+  ["Have you ever applied, or do you intend to apply, for Workers Compensation?","response-applied-workers-compensation","FD Pending"],
+  ["Which statement best applies to the status of your worker's compensation claim","response-w-c-statement","FD Pending"],
+  ["Have you ever applied, or do you intend to apply, for State Disability benefits from CA, NY, NJ, RI, HI, or Puerto Rico?","response-disabilityben-states","FD Pending"],
+  ["Have you ever applied for, or do you plan to apply for, public assistance or welfare?","response-welfare","FD Pending"],
+  ["Are there any surgeries planned for you in the near future?","response-future-surgery","FD Pending"],
+  ["Have any of your doctors told you to stop working or written a note saying you shouldn't work due to your condition?","response-doc-stopwork","FD Pending"],
+  ["Have you been treated at a hospital/clinic or any other medical facility, including therapists and counselors?","response-treat-hosp","FD Pending"],
+  ["Did you receive treatment at any other hospital or clinic?","response-other-hospital","FD Pending"],
+  ["Did you receive treatment at any other hospital or clinic? (2nd)","response-other-hospital1","FD Pending"],
+  ["Do any of these organizations have medical records that relate to your disability?","response-medical-records","FD Pending"],
+  ["Are you taking any medications?","response-medications","FD Pending"],
+  ["Have you had any medical tests done recently (Xrays, MRI, CT Scans, etc)?","response-med-test","FD Pending"],
+  ["Who can SSA or Fortis Disability reach out to if we are unable to get in touch with you?","response-thirdparty","FD Pending"],
+  ["Is their address the same as yours?","response-same-address","FD Pending"],
+  ["Can this contact person speak and understand English?","response-thirdparty-english","FD Pending"],
+  ["When was the last time you worked full-time for pay?","response-2-fulltime-pay","FD Initial"],
+  ["Have you looked for any other work?","response-ssd-full-time-work-looked-for","FD Initial"],
+  ["Do you think you could work now, if you are offered a full-time job?","response-ssd-full-time-could-you-work","FD Initial"],
+  ["Since you stopped working full-time, has your condition improved, or will it improve within the next 3 to 6 months to return to work full-time?","response-ssd-full-time-condition-improved","FD Initial"],
+  ["What caused the change in your work activity?","response-change-in-work-activity","FD Initial"],
+  ["Before ending your employment, did your employer provide: extra breaks, assistance from coworkers, special equipment, lower production rate, or other accommodations?","response-fwa-employer-accommodations","FD Initial"],
+  ["Please describe","response-fwa-please-describe","FD Initial"],
+  ["Did your employer indicate they could no longer continue providing these accommodations?","response-employer-stop-the-accommodations","FD Initial"],
+  ["Was there a cause for the change in your work activity, besides your health conditions (e.g. layoffs, moving)","response-other-reason-for-work-change","FD Initial"],
+  ["Please describe (work change)","response-other-reason-for-work-change-please-describe","FD Initial"],
+  ["When you first stopped working, did you think this would be a temporary break or permanent?","response-fwa-when-stopped-workin","FD Initial"],
+  ["What changed your mind? / When did you realize it would be longer-term?","response-fwa-change-my-mind-long-term","FD Initial"],
+  ["Did you collect or file for unemployment, after your most recent job ended?","response-fwa-unemployment-filed-collected","FD Initial"],
+  ["Did your doctors advise you to stop working?","response-doctor-advice-to-stop-working","FD Initial"],
+  ["What types of treatment have you attempted (physical therapy, surgery, medications, etc.)?","response-fwa-types-of-treatment-attempted","FD Initial"],
+  ["Have any of those treatments helped?","response-have-any-treatment-helped","FD Initial"],
+  ["What do your treating doctors say about your prognosis?","response-fwa-doctor-about-prognosis","FD Initial"],
+  ["What type of treatment options have your doctors discussed with you?","response-fwa-doctor-discussed-with-you","FD Initial"],
+  ["Are you currently waiting to start any new treatments?","response-fwa-waiting-for-new-treatments","FD Initial"],
+  ["What kind of treatment?","response-fwa-kind-of-treatment","FD Initial"],
+  ["Were you born in the United States or a United States Territory?","response-born-u-s","FD Initial"],
+  ["What city and state were you born in?","response-born-city-state","FD Initial"],
+  ["What city and country were you born in?","response-born-city-country","FD Initial"],
+  ["Are you a United States citizen?","response-us-citizen","FD Initial"],
+  ["Are you a naturalized citizen?","response-naturalized-citizen","FD Initial"],
+  ["What is your country of citizenship?","response-country-citizenship","FD Initial"],
+  ["Are you a legal resident of the United States?","response-legal-resident","FD Initial"],
+  ["On what date did you obtain your citizenship?","response-date-citizen","FD Initial"],
+  ["What date did you become naturalized?","response-date-naturalizedcitizen","FD Initial"],
+  ["What is your father's first and last name?","response-father-name","FD Initial"],
+  ["What is your mother's first and maiden name?","response-mothers-maiden","FD Initial"],
+  ["Have you used any other names?","response-provided-other-names","FD Initial"],
+  ["Please help me with the first name and last name.","response-fullname","FD Initial"],
+  ["Are you currently married?","response-married","FD Initial"],
+  ["Spouse full name","response-spouse","FD Initial"],
+  ["Spouse's Date of Birth or Approximate Age","response-d-o-b-spouse","FD Initial"],
+  ["Can you tell me the date you got married?","response-date-married","FD Initial"],
+  ["Was your marriage in the United States?","response-married-us","FD Initial"],
+  ["Can you tell me the city and state where you got married?","response-married-cty-state","FD Initial"],
+  ["What is the city and country of marriage?","response-married-city-country","FD Initial"],
+  ["How was the marriage performed?","response-marriage-performed","FD Initial"],
+  ["Do you have any previous marriages?","response-previous-marriage","FD Initial"],
+  ["Did your previous marriage last 10 years or longer?","response-10yr-prev-marriage","FD Initial"],
+  ["Did your previous marriage end due to other spouse's death?","response-prev-marriage-spousedeath1","FD Initial"],
+  ["Spouse full name (previous)","response-pre-spouse","FD Initial"],
+  ["Spouse's Date of Birth or Approximate Age (previous)","response-prev-spouse-dob","FD Initial"],
+  ["Spouse's SSN, if known","response-spouse-ssn1","FD Initial"],
+  ["Date of previous marriage","response-prev-marriage-date","FD Initial"],
+  ["Were you married in the US? (previous)","response-premarried-us","FD Initial"],
+  ["What city and state did you get married in? (previous)","response-premarried-cty-state","FD Initial"],
+  ["What city and country did you get married in? (previous)","response-premarried-city-country","FD Initial"],
+  ["How was the marriage performed? (previous)","response-premarriage-performed","FD Initial"],
+  ["When did the marriage end?","response-premarriage-end","FD Initial"],
+  ["Did the legal process for ending that marriage take place in the U.S.?","response-premarriage-end-u-s","FD Initial"],
+  ["Can you tell me the city and state where the legal process happened?","response-premarriage-end-city-state","FD Initial"],
+  ["What city and country did the marriage end?","response-premarriage-end-city-country","FD Initial"],
+  ["How did that marriage come to an end—was it through divorce, annulment, or the loss of your spouse?","response-premarriage-end-reason","FD Initial"],
+  ["Is the prior spouse living?","response-prior-spouse-living","FD Initial"],
+  ["Do you have any children?","response-children","FD Initial"],
+  ["How many children do you have?","response-total-children","FD Initial"],
+  ["Do you have any dependents that became disabled prior to age 22 (dependent's age)?","response-any-dependents","FD Initial"],
+  ["Dependent(s) Details","response-dependents-details","FD Initial"],
+  ["Does the dependent currently receive SSA benefits?","response-dependent-receive-ssa","FD Initial"],
+  ["Do you have any unmarried dependent(s) under the age of 19 still attending elementary or secondary school?","response-any-dependents2","FD Initial"],
+  ["Dependent(s) Details (2nd)","response-dependents-details2","FD Initial"],
+  ["Do you have a parent that you provide at least 50% or more financial support for, who you claim as a dependent on your taxes?","response-parent-financial-supp","FD Initial"],
+  ["Parent Name","response-parent-name-fd","FD Initial"],
+  ["What's your current living situation—would you say it's a house, apartment, facility, or another type of setting?","response-where-live","FD Initial"],
+  ["Do you have any assets worth more than $2 - $3,000, excluding your home and 1 vehicle?","response-cash-onhand","FD Initial"],
+  ["Please describe those assets and their estimated value?","response-assets-value","FD Initial"],
+  ["Were you working at any point last year? (2025)","response-work-lastyear","FD Initial"],
+  ["Did you work for an employer, or were you self-employed?","response-employer-selfemployed","FD Initial"],
+  ["Company name and address","response-employerdetails","FD Initial"],
+  ["What type of business was the self-employment?","response-business","FD Initial"],
+  ["Employment start date","response-start-job","FD Initial"],
+  ["Employment date last physically worked","response-stop-job","FD Initial"],
+  ["Are you still on the job with them right now?","response-still-working","FD Initial"],
+  ["Did you have any work or a job earlier this year? (2026)","response-work-thisyear","FD Initial"],
+  ["Was it a job with an employer, or were you self employed? (this year)","response-employer-selfemployed-thisyear","FD Initial"],
+  ["Company name and address (this year)","response-employerdetails2","FD Initial"],
+  ["What type of business was the self-employment? (this year)","response-business2","FD Initial"],
+  ["Employment start date (this year)","response-start-job2","FD Initial"],
+  ["Employment date last physically worked (this year)","response-stop-job2","FD Initial"],
+  ["Are you still on the job with them right now? (this year)","response-still-working2","FD Initial"],
+  ["What's the date you stopped working full time due to your disabling condition? (Alleged Onset Date)","response-aod-date","FD Initial"],
+  ["What were your total earnings last year? (Earned Income)","response-total-earnings","FD Initial"],
+  ["Can you share about how much you receive and where it's from—like work? (Last year)","response-amount-source1","FD Initial"],
+  ["Can you tell me your total earnings this year, up to the last day you actually worked?","response-total-earnings-thisyear","FD Initial"],
+  ["Can you share about how much you receive and where it's from—like work? (This year)","response-amount-source","FD Initial"],
+  ["Have you ever worked for the railroad for five years or more?","response-work-railroad","FD Initial"],
+  ["How many years did you work for the railroad?","response-year-railroad","FD Initial"],
+  ["Do you get, or qualify to receive, a railroad pension or annuity?","response-you-eligible-railroad","FD Initial"],
+  ["Did your spouse work for the railroad for five years or more?","response-spouse-railroad","FD Initial"],
+  ["Do you get, or qualify to receive, a railroad pension or annuity? (spouse)","response-you-eligible-railroad2","FD Initial"],
+  ["Does your spouse or ex-spouse get a railroad pension, or might they be eligible for one?","response-spouse-eligible-railroad","FD Initial"],
+  ["Have you ever worked outside the US?","response-outside-u-s","FD Initial"],
+  ["Has your spouse ever worked outside the US?","response-spouse-outside-u-s","FD Initial"],
+  ["Was your prior spouse covered under a foreign Social Security system?","response-prior-spouse-foreign-social-security-coverage","FD Initial"],
+  ["Were there any years you didn't work because you stayed home to care for a child under age 3?","response-no-earnings","FD Initial"],
+  ["And how many years did you not work during that time?","response-years-no-earnings","FD Initial"],
+  ["Have you ever applied, or do you intend to apply for VA benefits?","response-vet-ben","FD Initial"],
+  ["Are you getting any support or benefits from the VA at this time?","response-v-a-benefits","FD Initial"],
+  ["Have you ever applied, or do you intend to apply, for Workers Compensation?","response-applied-workers-compensation","FD Initial"],
+  ["Which statement best applies to the status of your worker's compensation claim","response-w-c-statement","FD Initial"],
+  ["Have you ever applied, or do you intend to apply, for State Disability benefits from CA, NY, NJ, RI, HI, or Puerto Rico?","response-disabilityben-states","FD Initial"],
+  ["Have you ever applied for, or do you plan to apply for, public assistance or welfare?","response-welfare","FD Initial"],
+  ["Please help me with conditions you're currently dealing with","response-list-of-injuries","FD Initial"],
+  ["Can you share how your health has impacted your ability to keep a job or perform tasks at work?","response-description-injury","FD Initial"],
+  ["Are there any surgeries planned for you in the near future?","response-future-surgery","FD Initial"],
+  ["Have any of your doctors told you to stop working or written a note saying you shouldn't work due to your condition?","response-doc-stopwork","FD Initial"],
+  ["What is your height?","response-height","FD Initial"],
+  ["What is your weight?","response-weight","FD Initial"],
+  ["Have you been treated at a hospital/clinic or any other medical facility, including therapists and counselors?","response-treat-hosp","FD Initial"],
+  ["Hospital Details","response-hospital-details-allsup","FD Initial"],
+  ["When did you visit the first time?","response-outpatient-firstvisit","FD Initial"],
+  ["Date of last visit","response-outpatient-lastvisit","FD Initial"],
+  ["Date of next visit (if applicable)","response-outpatient-nextvisit","FD Initial"],
+  ["What condition(s) does this hospital/clinic treat?","response-hosp-condition-treat","FD Initial"],
+  ["Did you receive treatment at any other hospital or clinic?","response-other-hospital","FD Initial"],
+  ["Hospital Details (2nd)","response-hospital-details-allsup1","FD Initial"],
+  ["When did you visit the first time? (2nd)","response-outpatient-firstvisit1","FD Initial"],
+  ["Date of last visit (2nd)","response-outpatient-lastvisit1","FD Initial"],
+  ["Date of next visit (2nd)","response-outpatient-nextvisit1","FD Initial"],
+  ["What condition(s) does this hospital/clinic treat? (2nd)","response-hosp-condition-treat1","FD Initial"],
+  ["Did you receive treatment at any other hospital or clinic? (2nd)","response-other-hospital1","FD Initial"],
+  ["Hospital Details (3rd)","response-hospital-details-allsup2","FD Initial"],
+  ["When did you visit the first time? (3rd)","response-outpatient-firstvisit2","FD Initial"],
+  ["Date of last visit (3rd)","response-outpatient-lastvisit2","FD Initial"],
+  ["Date of next visit (3rd)","response-outpatient-nextvisit2","FD Initial"],
+  ["What condition(s) does this hospital/clinic treat? (3rd)","response-hosp-condition-treat2","FD Initial"],
+  ["More Hospital (3rd)","response-other-hospital2","FD Initial"],
+  ["Hospital Details (4th)","response-hospital-details-allsup3","FD Initial"],
+  ["When did you visit the first time? (4th)","response-outpatient-firstvisit3","FD Initial"],
+  ["Date of last visit (4th)","response-outpatient-lastvisit3","FD Initial"],
+  ["Date of next visit (4th)","response-outpatient-nextvisit3","FD Initial"],
+  ["What condition(s) does this hospital/clinic treat? (4th)","response-hosp-condition-treat3","FD Initial"],
+  ["More Hospital (4th)","response-other-hospital3","FD Initial"],
+  ["Hospital Details (5th)","response-hospital-details-allsup4","FD Initial"],
+  ["When did you visit the first time? (5th)","response-outpatient-firstvisit4","FD Initial"],
+  ["Date of last visit (5th)","response-outpatient-lastvisit4","FD Initial"],
+  ["Date of next visit (5th)","response-outpatient-nextvisit4","FD Initial"],
+  ["What condition(s) does this hospital/clinic treat? (5th)","response-hosp-condition-treat4","FD Initial"],
+  ["Do any of these organizations have medical records that relate to your disability?","response-medical-records","FD Initial"],
+  ["Can you please provide the name of the organization?","response-organization-name","FD Initial"],
+  ["What would be the address of this organization?","response-organization-address","FD Initial"],
+  ["Help me with the phone number (organization)","response-organization-phonenumber","FD Initial"],
+  ["When did you visit this organization the first time?","response-organization-firstvisit","FD Initial"],
+  ["When did you visit this organization the last time?","response-organization-lastvisit","FD Initial"],
+  ["Are there any scheduled appointments with this organization in future?","response-organization-nextvisit","FD Initial"],
+  ["Please spell the name of the contact person","response-organization-contactperson","FD Initial"],
+  ["Help me with the case number","response-casenumber","FD Initial"],
+  ["Are you taking any medications?","response-medications","FD Initial"],
+  ["Help me with the name of all the medications you take for your disabling condition","response-medication-name","FD Initial"],
+  ["Which doctor and hospital prescribed the medication?","response-doc-prescribed","FD Initial"],
+  ["Which condition does the medication treat?","response-med-treat","FD Initial"],
+  ["Have you had any medical tests done recently (Xrays, MRI, CT Scans, etc)?","response-med-test","FD Initial"],
+  ["Please help me with the details for the test was performed","response-test-bodylocation","FD Initial"],
+  ["Please list all jobs you held during the five years before you became unable to work.","response-jobs-5yrs","FD Initial"],
+  ["More Jobs (1)","response-jobs-5yrs1","FD Initial"],
+  ["More Jobs (2)","response-jobs-5yrs2","FD Initial"],
+  ["If you only had 1 job within the past 5 years from your date last physically worked, please provide the details","response-one-job","FD Initial"],
+  ["Describe in 4-5 sentences the tasks done on a typical workday","response-task-describe","FD Initial"],
+  ["Did you write or complete reports in a typical workday?","response-write-report","FD Initial"],
+  ["List the type of reports written or completed","response-type-report","FD Initial"],
+  ["How much time was spent writing or completing reports in a typical workday or work week?","response-time-report","FD Initial"],
+  ["Did you hire and fire employees as a supervisor?","response-hire-fire","FD Initial"],
+  ["Describe who you supervised, and what supervisory duties you had.","response-describe-duties","FD Initial"],
+  ["List the machines, tools, and equipment you used regularly when doing this job","response-tools-machines","FD Initial"],
+  ["Did this job require you to interact with coworkers, customers, the general public, or anyone else?","response-interact","FD Initial"],
+  ["Describe who you interacted with, the purpose of the interaction, how you interacted, and how much time you spent doing it per workday or workweek.","response-describe-interact","FD Initial"],
+  ["How much time did you spend standing and walking in an AVERAGE day of work?","response-stand-walk","FD Initial"],
+  ["How much time did you spend sitting in an AVERAGE day of work?","response-sitting","FD Initial"],
+  ["How much time did you spend stooping or bending forward at the waist in an AVERAGE day of work?","response-stooping-bending","FD Initial"],
+  ["How much time did you spend kneeling in an AVERAGE day of work?","response-kneeling","FD Initial"],
+  ["How much time did you spend crouching or squatting in an AVERAGE day of work?","response-crouch-squat","FD Initial"],
+  ["How much time did you spend crawling on hands/knees in an AVERAGE day of work?","response-crawling","FD Initial"],
+  ["How much time did you spend using fingers to touch, pick or pinch in an AVERAGE day of work?","response-pick-pinch","FD Initial"],
+  ["How much time did you spend using hands to seize, hold, grasp, or turn in an AVERAGE day of work?","response-hold-grasp","FD Initial"],
+  ["How much time did you spend reaching at or below shoulder level in an AVERAGE day of work?","response-reachbelow","FD Initial"],
+  ["Did your job involve frequent reaching at or below shoulder height?","response-reaching-armbelow","FD Initial"],
+  ["On an average workday, about how much time did you spend reaching above shoulder level?","response-reachoverhead","FD Initial"],
+  ["Did your job involve reaching overhead—like lifting or working with your hands above shoulder level?","response-reaching-armoverhead","FD Initial"],
+  ["How much time did you spend climbing stairs or ramps in an AVERAGE day of work?","response-climbingstairs","FD Initial"],
+  ["How much time did you spend climbing ladders, ropes or scaffolds in an AVERAGE day of work?","response-climbingladders","FD Initial"],
+  ["What did you lift and carry in this job?","response-lift-carry","FD Initial"],
+  ["How far and how often did you carry these items in a typical day?","response-far-often-items","FD Initial"],
+  ["What is the heaviest approximate weight you ever lifted at any time you performed this job?","response-weight-heavy-items","FD Initial"],
+  ["What was the weight you most frequently lifted?","response-weight2","FD Initial"],
+  ["Did this job involve any tough physical work or working in challenging conditions like heat, cold, noise, or chemicals?","response-physical-work","FD Initial"],
+  ["Outdoors","response-outdoors","FD Initial"],
+  ["Extreme Cold (non-weather related)","response-extremecold","FD Initial"],
+  ["Extreme Heat (non-weather related)","response-extremeheat","FD Initial"],
+  ["Wetness","response-wetness","FD Initial"],
+  ["Humidity","response-humidity","FD Initial"],
+  ["Hazardous Substances","response-hazardoussub","FD Initial"],
+  ["Moving Mechanical Parts","response-movingmech","FD Initial"],
+  ["High, Exposed Places","response-highexpo","FD Initial"],
+  ["Heavy Vibrations","response-heavyvibration","FD Initial"],
+  ["Loud Noises","response-loudnoises","FD Initial"],
+  ["Other (physical conditions)","response-other-physical","FD Initial"],
+  ["Explain how your medical conditions would affect your ability to do this job?","response-medical-ability","FD Initial"],
+  ["What is your highest level of education completed?","response-highest-education","FD Initial"],
+  ["What was the month/year of completion?","response-education-month-year","FD Initial"],
+  ["Please help me with the name of the school?","response-education-schoolname","FD Initial"],
+  ["Where is the school located, please help me with City and State","response-education-school-city-state","FD Initial"],
+  ["Did you attend any special education classes?","response-special-classes","FD Initial"],
+  ["Were the special education classes performed in the United States?","response-specialclasses-u-s","FD Initial"],
+  ["Please help me with the name of the school? (special education)","response-specialclasses-schoolname","FD Initial"],
+  ["Can you tell me the city and state where the school is located? (special education)","response-specialclasses-school-city-state","FD Initial"],
+  ["School city & country (special education)","response-specialclasses-school-city-country","FD Initial"],
+  ["What is the start date of the special education classes?","response-special-classes-date","FD Initial"],
+  ["What is the end date of the special education classes?","response-special-classes-dateend","FD Initial"],
+  ["What grade did you last receive special education?","response-grade-special-education","FD Initial"],
+  ["Did you ever attend any special training, trade, or vocational school?","response-special-training","FD Initial"],
+  ["Was the special training performed in the United States?","response-special-training-u-s","FD Initial"],
+  ["Please help me with the name of training facility","response-training-facility","FD Initial"],
+  ["Facility address","response-training-facility-address","FD Initial"],
+  ["Phone number (training facility)","response-training-facility-phonenumber","FD Initial"],
+  ["What type of special training, trade, or vocational school did you complete?","response-training-type","FD Initial"],
+  ["What is the approximate month and year you completed the training?","response-training-type-month-year","FD Initial"],
+  ["Is there any additional information you would like to provide?","response-additional-info","FD Initial"],
+  ["Who can SSA or Fortis Disability reach out to if we are unable to get in touch with you?","response-thirdparty","FD Initial"],
+  ["Third party full name","response-thirdparty-fullname","FD Initial"],
+  ["Relationship to claimant","response-relationship-claimant","FD Initial"],
+  ["Is their address the same as yours?","response-same-address","FD Initial"],
+  ["What is their phone number? (third party)","response-thirdparty-phonenumber","FD Initial"],
+  ["What is their address? (third party)","response-thirdparty-address","FD Initial"]
+];
+const DATA=RAW.map(r=>({q:r[0],rc:r[1],tab:r[2]}));
+let selected=null,entries=[],activeFilter='all';
+function tc(t){const n=t.toLowerCase();if(n.includes('pending'))return'pending';if(n.includes('initial'))return'initial';return'other';}
+function tbCls(t){return'tb-'+tc(t);}
+function eH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function eJ(s){return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"');}
+function hl(t,q){if(!q)return eH(t);const i=t.toLowerCase().indexOf(q.toLowerCase());if(i<0)return eH(t);return eH(t.slice(0,i))+'<mark>'+eH(t.slice(i,i+q.length))+'</mark>'+eH(t.slice(i+q.length));}
+function buildFilters(){
+  const tabs=[...new Set(DATA.map(d=>d.tab))];
+  const fr=document.getElementById('filter-row');
+  fr.innerHTML=`<button class="fpill active-all" data-tab="all" onclick="setFilter('all',this)">All tabs</button>`;
+  tabs.forEach(t=>{
+    const count=DATA.filter(d=>d.tab===t).length;
+    const b=document.createElement('button');
+    b.className='fpill';b.dataset.tab=t;b.onclick=function(){setFilter(t,this);};
+    b.innerHTML=`<span class="${tbCls(t)}" style="display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;font-weight:500;">${eH(t)}</span>&nbsp;<span style="opacity:0.6;font-size:11px;">${count}</span>`;
+    fr.appendChild(b);
+  });
+}
+function setFilter(tab,el){
+  activeFilter=tab;
+  document.querySelectorAll('.fpill').forEach(b=>{b.className='fpill';if(b.dataset.tab===tab)b.className+=' active-'+(tab==='all'?'all':tc(tab));});
+  onSearch();
+}
+document.getElementById('qsearch').addEventListener('input',onSearch);
+document.getElementById('qsearch').addEventListener('focus',onSearch);
+document.getElementById('qsearch').addEventListener('blur',()=>setTimeout(()=>{document.getElementById('dd').style.display='none';},160));
+function onSearch(){
+  const q=document.getElementById('qsearch').value.trim();
+  const dd=document.getElementById('dd');
+  if(!q){dd.style.display='none';return;}
+  let pool=activeFilter==='all'?DATA:DATA.filter(d=>d.tab===activeFilter);
+  const m=pool.filter(d=>d.q.toLowerCase().includes(q.toLowerCase())||d.rc.toLowerCase().includes(q.toLowerCase())).slice(0,35);
+  dd.innerHTML=m.length?m.map(d=>`<div class="dd-item" onmousedown="selectItem(${DATA.indexOf(d)})"><div>${hl(d.q,q)}${NEW.includes(d.rc)?'<span class="new-tag">new</span>':''}</div><div class="dd-meta"><span class="dd-code">${hl(d.rc,q)}</span><span class="tbadge ${tbCls(d.tab)}">${eH(d.tab)}</span></div></div>`).join(''):'<div class="no-results">No matching questions.</div>';
+  dd.style.display='block';
+}
+function selectItem(i){
+  selected=DATA[i];
+  document.getElementById('qsearch').value=selected.q;
+  document.getElementById('disp-code').textContent=selected.rc;
+  document.getElementById('disp-q').textContent=selected.q;
+  document.getElementById('disp-tab').innerHTML=`<span class="tbadge ${tbCls(selected.tab)}">${eH(selected.tab)}</span>`;
+  document.getElementById('dd').style.display='none';
+  document.getElementById('errmsg').textContent='';
+  document.getElementById('qresp').focus();
+}
+function addEntry(){
+  const err=document.getElementById('errmsg');
+  const resp=document.getElementById('qresp').value.trim();
+  if(!selected){err.textContent='Select a question first.';return;}
+  if(!resp){err.textContent='Response is required.';return;}
+  if(entries.find(e=>e.rc===selected.rc)){err.textContent='Already added.';return;}
+  err.textContent='';
+  entries.push({rc:selected.rc,q:selected.q,tab:selected.tab,resp});
+  document.getElementById('qsearch').value='';
+  document.getElementById('disp-code').textContent='—';
+  document.getElementById('disp-q').textContent='—';
+  document.getElementById('disp-tab').textContent='—';
+  document.getElementById('qresp').value='';
+  selected=null;render();
+}
+function removeEntry(i){entries.splice(i,1);render();}
+function render(){
+  const wrap=document.getElementById('entries-wrap');
+  const empty=document.getElementById('empty-entries');
+  if(!entries.length){wrap.style.display='none';empty.style.display='block';return;}
+  wrap.style.display='block';empty.style.display='none';
+  document.getElementById('cbadge').textContent=entries.length;
+  document.getElementById('elist').innerHTML=entries.map((e,i)=>`<div class="ecard"><div class="emeta"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;"><span class="ekey">${eH(e.rc)}</span><span class="tbadge ${tbCls(e.tab)}">${eH(e.tab)}</span></div><div class="eq">${eH(e.q)}</div><div class="eresp">${eH(e.resp)}</div></div><button class="btn-del" onclick="removeEntry(${i})"><i class="ti ti-x"></i></button></div>`).join('');
+  document.getElementById('jout').textContent=entries.map(e=>`"${e.rc}":{"questionText":"${eJ(e.q)}","questionResponse":"${eJ(e.resp)}"}`).join(',');
+}
+function copyJSON(){
+  navigator.clipboard.writeText(document.getElementById('jout').textContent).then(()=>{
+    const m=document.getElementById('copymsg');m.style.display='inline';
+    setTimeout(()=>{m.style.display='none';},2000);
+  });
+}
+function clearAll(){entries=[];render();}
+buildFilters();
+</script>
+</body>
+</html>
