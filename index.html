@@ -176,7 +176,7 @@
 </div>
 <script>
   // ─── REPLACE THIS URL after deploying your Apps Script ───────────────────────
-  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzaAEay1JAAn_rSIRbBeUp_WE8OjtBUKhdVt4uRz4PPQfDqXqs61ABH5CWVe_8f8jafpg/exec';
+  var SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL';
   // ─────────────────────────────────────────────────────────────────────────────
 
   var DATA = [], selected = null, entries = [], activeFilter = 'all';
@@ -184,7 +184,7 @@
   function tc(t){var n=t.toLowerCase();if(n.includes('pending'))return'pending';if(n.includes('initial'))return'initial';return'other';}
   function tbCls(t){return'tb-'+tc(t);}
   function eH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-  function eJ(s){return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"');}
+  function eJ(s){return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\r\n/g,'\\n').replace(/\r/g,'\\n').replace(/\n/g,'\\n');}
   function hl(t,q){if(!q)return eH(t);var i=t.toLowerCase().indexOf(q.toLowerCase());if(i<0)return eH(t);return eH(t.slice(0,i))+'<mark>'+eH(t.slice(i,i+q.length))+'</mark>'+eH(t.slice(i+q.length));}
 
   function setStatus(color, msg, spinning) {
