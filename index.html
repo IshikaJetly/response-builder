@@ -17,6 +17,8 @@
       --green-bg: #E1F5EE; --green-text: #085041; --green-border: #5DCAA5;
       --purple-bg: #EEEDFE; --purple-text: #3C3489; --purple-border: #AFA9EC;
       --amber-bg: #FAEEDA; --amber-text: #633806; --amber-border: #EF9F27;
+      --blue-bg: #E0F0FF; --blue-text: #0A3A6B; --blue-border: #6AAEE8;
+      --pink-bg: #FCE8F3; --pink-text: #7B1C53; --pink-border: #E87BBD;
       --danger-bg: #FCEBEB; --danger-text: #A32D2D; --danger-border: #F09595;
     }
     @media (prefers-color-scheme: dark) {
@@ -27,6 +29,8 @@
         --green-bg: #04342C; --green-text: #9FE1CB;
         --purple-bg: #26215C; --purple-text: #CECBF6;
         --amber-bg: #412402; --amber-text: #FAC775;
+        --blue-bg: #0A2540; --blue-text: #90C8F5;
+        --pink-bg: #3D0A25; --pink-text: #F5A8D8;
         --danger-bg: #501313; --danger-text: #F7C1C1;
       }
     }
@@ -52,10 +56,12 @@
     textarea { resize: vertical; min-height: 80px; }
     .filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
     .fpill { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 10px; border: 0.5px solid var(--border2); background: var(--bg2); cursor: pointer; color: var(--text2); font-family: var(--font); }
-    .fpill.active-all { background: var(--bg); border-color: var(--border2); color: var(--text); font-weight: 600; }
+    .fpill.active-all     { background: var(--bg);        border-color: var(--border2);       color: var(--text);        font-weight: 600; }
     .fpill.active-pending { background: var(--purple-bg); border-color: var(--purple-border); color: var(--purple-text); }
-    .fpill.active-initial { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
-    .fpill.active-other { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber-text); }
+    .fpill.active-initial { background: var(--green-bg);  border-color: var(--green-border);  color: var(--green-text); }
+    .fpill.active-ssd     { background: var(--blue-bg);   border-color: var(--blue-border);   color: var(--blue-text); }
+    .fpill.active-dc      { background: var(--pink-bg);   border-color: var(--pink-border);   color: var(--pink-text); }
+    .fpill.active-other   { background: var(--amber-bg);  border-color: var(--amber-border);  color: var(--amber-text); }
     .search-wrap { position: relative; }
     .dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--radius); max-height: 260px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: none; }
     .dd-item { padding: 10px 12px; cursor: pointer; font-size: 13px; border-bottom: 0.5px solid var(--border); }
@@ -65,8 +71,10 @@
     .dd-code { font-family: var(--mono); font-size: 11px; color: var(--text2); }
     .tbadge { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px; }
     .tb-pending { background: var(--purple-bg); color: var(--purple-text); }
-    .tb-initial { background: var(--green-bg); color: var(--green-text); }
-    .tb-other { background: var(--amber-bg); color: var(--amber-text); }
+    .tb-initial { background: var(--green-bg);  color: var(--green-text); }
+    .tb-ssd     { background: var(--blue-bg);   color: var(--blue-text); }
+    .tb-dc      { background: var(--pink-bg);   color: var(--pink-text); }
+    .tb-other   { background: var(--amber-bg);  color: var(--amber-text); }
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
     .ro { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: 14px; color: var(--text); min-height: 38px; line-height: 1.5; }
     .ro.mono { font-family: var(--mono); font-size: 12px; color: var(--text2); }
@@ -84,7 +92,7 @@
     .emeta { flex: 1; min-width: 0; }
     .ekey { font-family: var(--mono); font-size: 11px; color: var(--text2); }
     .eq { font-size: 13px; color: var(--text); margin: 2px 0; }
-    .eresp { font-size: 12px; color: var(--text3); }
+    .eresp { font-size: 12px; color: var(--text3); white-space: pre-wrap; }
     .btn-del { background: none; border: none; cursor: pointer; color: var(--danger-text); padding: 2px; font-size: 16px; line-height: 1; }
     .output-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
     .output-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1rem; font-family: var(--mono); font-size: 11.5px; color: var(--text); white-space: pre-wrap; word-break: break-all; min-height: 56px; line-height: 1.6; }
@@ -93,18 +101,11 @@
     .no-results { padding: 10px 12px; font-size: 13px; color: var(--text2); }
     .empty-state { text-align: center; padding: 2rem 1rem; color: var(--text2); font-size: 13px; }
     .empty-icon { font-size: 32px; margin-bottom: 8px; opacity: 0.35; }
-    .config-banner { background: var(--amber-bg); border: 0.5px solid var(--amber-border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 1.25rem; font-size: 13px; color: var(--amber-text); display: none; }
     @media (max-width: 480px) { .two-col { grid-template-columns: 1fr; } .app-title span { display: none; } }
   </style>
 </head>
 <body>
 <div class="container">
-
-  <div class="config-banner" id="config-banner">
-    <strong><i class="ti ti-alert-triangle"></i> Setup required:</strong>
-    Replace <code>YOUR_APPS_SCRIPT_URL</code> in this file with your deployed Google Apps Script URL.
-    See setup instructions from Claude.
-  </div>
 
   <div class="app-header">
     <p class="app-title">Response builder <span>JSON generator · CS intake</span></p>
@@ -142,7 +143,7 @@
     <div style="margin-bottom:14px;"><label>Question text</label><div class="ro" id="disp-q">—</div></div>
     <div>
       <label for="qresp">Claimant response</label>
-      <textarea id="qresp" placeholder="Enter the claimant's answer…"></textarea>
+      <textarea id="qresp" placeholder="Enter the claimant's answer… (press Enter for new lines)"></textarea>
     </div>
     <div class="actions">
       <button class="btn-add" onclick="addEntry()"><i class="ti ti-plus"></i> Add to JSON</button>
@@ -175,56 +176,85 @@
 
 </div>
 <script>
-  // ─── REPLACE THIS URL after deploying your Apps Script ───────────────────────
- var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQM7lJu_uHq7UD3Vqh_i5Bs3DV5k0Du8WNj4_LavRsltWSu0Sk69sNCqktF1FllJ6l/exec';
-  // ─────────────────────────────────────────────────────────────────────────────
+  var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQM7lJu_uHq7UD3Vqh_i5Bs3DV5k0Du8WNj4_LavRsltWSu0Sk69sNCqktF1FllJ6l/exec';
 
   var DATA = [], selected = null, entries = [], activeFilter = 'all';
 
-  function tc(t){var n=t.toLowerCase();if(n.includes('pending'))return'pending';if(n.includes('initial'))return'initial';return'other';}
-  function tbCls(t){return'tb-'+tc(t);}
-  function eH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-  function eJ(s){return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\r\n/g,'\\n').replace(/\r/g,'\\n').replace(/\n/g,'\\n');}
-  function hl(t,q){if(!q)return eH(t);var i=t.toLowerCase().indexOf(q.toLowerCase());if(i<0)return eH(t);return eH(t.slice(0,i))+'<mark>'+eH(t.slice(i,i+q.length))+'</mark>'+eH(t.slice(i+q.length));}
+  function tc(t) {
+    var n = t.toLowerCase();
+    if (n.includes('pending')) return 'pending';
+    if (n.includes('initial')) return 'initial';
+    if (n.includes('ssd') || n.includes('ssi')) return 'ssd';
+    if (n.includes('dc')) return 'dc';
+    return 'other';
+  }
+  function tbCls(t) { return 'tb-' + tc(t); }
+  function fpCls(t) { return 'active-' + tc(t); }
+  function eH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function eJ(s) { return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\r\n/g,'\\n').replace(/\r/g,'\\n').replace(/\n/g,'\\n'); }
+  function hl(t, q) {
+    if (!q) return eH(t);
+    var i = t.toLowerCase().indexOf(q.toLowerCase());
+    if (i < 0) return eH(t);
+    return eH(t.slice(0,i)) + '<mark>' + eH(t.slice(i,i+q.length)) + '</mark>' + eH(t.slice(i+q.length));
+  }
 
   function setStatus(color, msg, spinning) {
     document.getElementById('sdot').className = 'status-dot dot-' + color;
     document.getElementById('stext').textContent = msg;
-    document.getElementById('sicon').innerHTML = spinning
-      ? '<i class="ti ti-refresh spin" style="font-size:13px;"></i>'
-      : '';
+    document.getElementById('sicon').innerHTML = spinning ? '<i class="ti ti-refresh spin" style="font-size:13px;"></i>' : '';
   }
 
-  async function loadData() {
-    if (SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL') {
-      document.getElementById('config-banner').style.display = 'block';
-      setStatus('red', 'Setup required — see banner above', false);
-      return;
-    }
+  // JSONP loader — bypasses CORS completely
+  function loadData() {
     setStatus('amber', 'Loading questions from sheet…', true);
-    try {
-      var res = await fetch(SCRIPT_URL);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      DATA = await res.json();
+    var cbName = 'cb_' + Date.now();
+    var script = document.createElement('script');
+
+    var timer = setTimeout(function() {
+      setStatus('red', 'Request timed out — check Apps Script deployment.', false);
+      cleanup();
+    }, 15000);
+
+    window[cbName] = function(data) {
+      clearTimeout(timer);
+      DATA = Array.isArray(data) ? data : [];
       buildFilters();
       var input = document.getElementById('qsearch');
       input.disabled = false;
       input.placeholder = 'Search across ' + DATA.length + ' questions…';
-      var tabs = [...new Set(DATA.map(d => d.tab))];
+      var tabs = [];
+      DATA.forEach(function(d){ if (tabs.indexOf(d.tab) === -1) tabs.push(d.tab); });
       setStatus('green', DATA.length + ' questions loaded from ' + tabs.length + ' tab' + (tabs.length > 1 ? 's' : '') + ' · Live from sheet', false);
-    } catch(e) {
-      setStatus('red', 'Could not load sheet data. Check your Apps Script URL.', false);
+      cleanup();
+    };
+
+    script.onerror = function() {
+      clearTimeout(timer);
+      setStatus('red', 'Could not load sheet data — check Apps Script URL.', false);
+      cleanup();
+    };
+
+    function cleanup() {
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
     }
+
+    script.src = SCRIPT_URL + '?callback=' + cbName;
+    document.body.appendChild(script);
   }
 
   function buildFilters() {
-    var tabs = [...new Set(DATA.map(d => d.tab))];
+    var tabs = [];
+    DATA.forEach(function(d){ if (tabs.indexOf(d.tab) === -1) tabs.push(d.tab); });
     var fr = document.getElementById('filter-row');
     fr.innerHTML = '<button class="fpill active-all" data-tab="all" onclick="setFilter(\'all\',this)">All tabs</button>';
     tabs.forEach(function(t) {
-      var count = DATA.filter(d => d.tab === t).length;
+      var count = 0;
+      DATA.forEach(function(d){ if (d.tab === t) count++; });
       var b = document.createElement('button');
-      b.className = 'fpill'; b.dataset.tab = t;
+      b.className = 'fpill';
+      b.dataset.tab = t;
       b.onclick = function(){ setFilter(t, this); };
       b.innerHTML = '<span class="' + tbCls(t) + '" style="display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;font-weight:500;">' + eH(t) + '</span>&nbsp;<span style="opacity:0.6;font-size:11px;">' + count + '</span>';
       fr.appendChild(b);
@@ -235,7 +265,7 @@
     activeFilter = tab;
     document.querySelectorAll('.fpill').forEach(function(b) {
       b.className = 'fpill';
-      if (b.dataset.tab === tab) b.className += ' active-' + (tab === 'all' ? 'all' : tc(tab));
+      if (b.dataset.tab === tab) b.className += ' ' + (tab === 'all' ? 'active-all' : fpCls(tab));
     });
     onSearch();
   }
@@ -249,10 +279,10 @@
     var q = searchInput.value.trim();
     var dd = document.getElementById('dd');
     if (!q) { dd.style.display = 'none'; return; }
-    var pool = activeFilter === 'all' ? DATA : DATA.filter(d => d.tab === activeFilter);
-    var m = pool.filter(d => d.q.toLowerCase().includes(q.toLowerCase()) || d.rc.toLowerCase().includes(q.toLowerCase())).slice(0, 35);
+    var pool = activeFilter === 'all' ? DATA : DATA.filter(function(d){ return d.tab === activeFilter; });
+    var m = pool.filter(function(d){ return d.q.toLowerCase().indexOf(q.toLowerCase()) > -1 || d.rc.toLowerCase().indexOf(q.toLowerCase()) > -1; }).slice(0, 35);
     dd.innerHTML = m.length
-      ? m.map(d => '<div class="dd-item" onmousedown="selectItem(' + DATA.indexOf(d) + ')"><div>' + hl(d.q, q) + '</div><div class="dd-meta"><span class="dd-code">' + hl(d.rc, q) + '</span><span class="tbadge ' + tbCls(d.tab) + '">' + eH(d.tab) + '</span></div></div>').join('')
+      ? m.map(function(d){ return '<div class="dd-item" onmousedown="selectItem(' + DATA.indexOf(d) + ')"><div>' + hl(d.q, q) + '</div><div class="dd-meta"><span class="dd-code">' + hl(d.rc, q) + '</span><span class="tbadge ' + tbCls(d.tab) + '">' + eH(d.tab) + '</span></div></div>'; }).join('')
       : '<div class="no-results">No matching questions.</div>';
     dd.style.display = 'block';
   }
@@ -273,7 +303,7 @@
     var resp = document.getElementById('qresp').value.trim();
     if (!selected) { err.textContent = 'Select a question first.'; return; }
     if (!resp) { err.textContent = 'Response is required.'; return; }
-    if (entries.find(e => e.rc === selected.rc)) { err.textContent = 'Already added.'; return; }
+    if (entries.filter(function(e){ return e.rc === selected.rc; }).length) { err.textContent = 'Already added.'; return; }
     err.textContent = '';
     entries.push({ rc: selected.rc, q: selected.q, tab: selected.tab, resp: resp });
     searchInput.value = '';
@@ -296,7 +326,9 @@
     document.getElementById('elist').innerHTML = entries.map(function(e, i) {
       return '<div class="ecard"><div class="emeta"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;"><span class="ekey">' + eH(e.rc) + '</span><span class="tbadge ' + tbCls(e.tab) + '">' + eH(e.tab) + '</span></div><div class="eq">' + eH(e.q) + '</div><div class="eresp">' + eH(e.resp) + '</div></div><button class="btn-del" onclick="removeEntry(' + i + ')"><i class="ti ti-x"></i></button></div>';
     }).join('');
-    document.getElementById('jout').textContent = entries.map(e => '"' + e.rc + '":{"questionText":"' + eJ(e.q) + '","questionResponse":"' + eJ(e.resp) + '"}').join(',');
+    document.getElementById('jout').textContent = entries.map(function(e){
+      return '"' + e.rc + '":{"questionText":"' + eJ(e.q) + '","questionResponse":"' + eJ(e.resp) + '"}';
+    }).join(',');
   }
 
   function copyJSON() {
